@@ -255,12 +255,11 @@ cat << 'CONFIG' > "$HOME/.config/waybar/config.jsonc"
   // Power & Audio
   // ═══════════════════════════════════════════════════════════════════════════
   "battery": {
-    "format": "{capacity}% {icon}",
+    "format": "{capacity}% {icon} ({power}W)",
     "format-time": "{H}:{M:02}",
-    "format-discharging": "{capacity}% {icon}",
+    "format-discharging": "{capacity}% {icon} ({power}W)",
     "format-charging": "{capacity}% 󰂄 ({power}W)",
     "format-plugged": "{capacity}%  ({power}W)",
-    "format-alt": "{time} {icon}",
     "format-icons": {
       "charging": ["󰢜", "󰂆", "󰂇", "󰂈", "󰢝", "󰂉", "󰢞", "󰂊", "󰂋", "󰂅"],
       "default": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
@@ -376,39 +375,44 @@ print_step "Writing style.css..."
 
 cat << 'STYLE' > "$HOME/.config/waybar/style.css"
 /* ═══════════════════════════════════════════════════════════════════════════
-   🎨 Aesthetic Waybar Theme
-   A modern, glassmorphic design with smooth gradients and animations
+   🎨 Aesthetic Waybar Theme - Omarchy Integrated
+   Uses colors from current omarchy theme
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* Import omarchy theme colors (foreground + background) */
+@import url("file:///home/dev/.config/omarchy/current/theme/waybar.css");
+
 /* ─────────────────────────────────────────────────────────────────────────────
-   Color Palette (Catppuccin-inspired with custom tweaks)
+   Color Palette - Derived from Omarchy Theme
    ───────────────────────────────────────────────────────────────────────────── */
-@define-color bg-primary rgba(30, 30, 46, 0.85);
-@define-color bg-secondary rgba(49, 50, 68, 0.9);
-@define-color bg-tertiary rgba(69, 71, 90, 0.8);
-@define-color bg-hover rgba(88, 91, 112, 0.9);
+@define-color bg-primary alpha(@background, 0.92);
+@define-color bg-secondary alpha(@background, 0.95);
+@define-color bg-tertiary alpha(@foreground, 0.08);
+@define-color bg-hover alpha(@foreground, 0.15);
 
-@define-color text-primary #cdd6f4;
-@define-color text-secondary #a6adc8;
-@define-color text-dim #6c7086;
+@define-color text-primary @foreground;
+@define-color text-secondary alpha(@foreground, 0.7);
+@define-color text-dim alpha(@foreground, 0.4);
 
-@define-color accent-pink #f5c2e7;
-@define-color accent-mauve #cba6f7;
-@define-color accent-red #f38ba8;
-@define-color accent-peach #fab387;
-@define-color accent-yellow #f9e2af;
-@define-color accent-green #a6e3a1;
-@define-color accent-teal #94e2d5;
-@define-color accent-sky #89dceb;
-@define-color accent-sapphire #74c7ec;
-@define-color accent-blue #89b4fa;
-@define-color accent-lavender #b4befe;
+/* Accent colors derived from omarchy colors.toml palette */
+@define-color accent #7d82d9;
+@define-color accent-pink #c89dc1;
+@define-color accent-mauve #c2c4f0;
+@define-color accent-red #ED5B5A;
+@define-color accent-peach #F99957;
+@define-color accent-yellow #E9BB4F;
+@define-color accent-green #92a593;
+@define-color accent-teal #a3bfd1;
+@define-color accent-sky #a3bfd1;
+@define-color accent-sapphire #6d7db6;
+@define-color accent-blue #7d82d9;
+@define-color accent-lavender #c2c4f0;
 
-@define-color border-color rgba(180, 190, 254, 0.15);
-@define-color shadow-color rgba(0, 0, 0, 0.3);
+@define-color border-color alpha(@foreground, 0.12);
+@define-color shadow-color rgba(0, 0, 0, 0.4);
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Base Bar Styling - Floating Glassmorphic Design
+   Base Bar Styling - Full Width (No Outer Padding)
    ───────────────────────────────────────────────────────────────────────────── */
 * {
     font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font", monospace;
@@ -424,14 +428,11 @@ window#waybar {
     color: @text-primary;
 }
 
-window#waybar > box {
+window#waybar>box {
     background: @bg-primary;
-    border: 1px solid @border-color;
-    border-radius: 14px;
-    margin: 6px 10px 0 10px;
-    padding: 0 8px;
-    box-shadow: 0 4px 20px @shadow-color,
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid @border-color;
+    margin: 0;
+    padding: 0 6px;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -440,7 +441,7 @@ window#waybar > box {
 .modules-left,
 .modules-center,
 .modules-right {
-    padding: 0 4px;
+    padding: 0;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -465,12 +466,12 @@ window#waybar > box {
 #custom-voxtype,
 #custom-screenrecording-indicator,
 #custom-expand-icon {
-    background: @bg-secondary;
-    border: 1px solid @border-color;
-    border-radius: 10px;
-    padding: 2px 12px;
-    margin: 4px 3px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: transparent;
+    padding: 0 8px;
+    margin: 0 2px;
+    border-bottom: 2px solid transparent;
+    /* Prepare for hover underline */
+    transition: all 0.2s ease;
 }
 
 /* Hover state for all modules */
@@ -490,85 +491,84 @@ window#waybar > box {
 #custom-hyprwhspr:hover,
 #custom-voxtype:hover,
 #custom-expand-icon:hover {
-    background: @bg-hover;
-    border-color: rgba(180, 190, 254, 0.3);
-    box-shadow: 0 0 12px rgba(180, 190, 254, 0.15);
+    background: @bg-tertiary;
+    border-bottom-color: @accent;
+    box-shadow: none;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Omarchy Logo - Gradient Accent
+   Omarchy Logo - Text Accent
    ───────────────────────────────────────────────────────────────────────────── */
 #custom-omarchy {
     font-size: 16px;
     color: @accent-mauve;
-    padding: 2px 14px;
-    background: linear-gradient(135deg, 
-        rgba(203, 166, 247, 0.2), 
-        rgba(180, 190, 254, 0.1));
-    border-color: rgba(203, 166, 247, 0.3);
+    font-weight: bold;
+    padding: 0 10px;
+    background: transparent;
+    border: none;
 }
 
 #custom-omarchy:hover {
-    background: linear-gradient(135deg, 
-        rgba(203, 166, 247, 0.35), 
-        rgba(180, 190, 254, 0.2));
-    box-shadow: 0 0 16px rgba(203, 166, 247, 0.25);
+    background: @bg-tertiary;
+    box-shadow: none;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Workspaces - Modern Indicator Pills
+   Workspaces - Terminal Blocks
    ───────────────────────────────────────────────────────────────────────────── */
 #workspaces {
-    padding: 2px 6px;
-    background: @bg-tertiary;
+    background: transparent;
+    margin: 0;
+    padding: 0;
 }
 
 #workspaces button {
-    color: @text-dim;
+    color: @text-secondary;
     background: transparent;
-    border: none;
-    border-radius: 8px;
-    padding: 2px 10px;
-    margin: 2px;
-    min-width: 20px;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+    /* Placeholder for layout stability */
+    border-radius: 0;
+    padding: 0 10px;
+    /* Wider for block feel */
+    margin: 0;
+    transition: none;
+    /* Instant terminal feel */
 }
 
 #workspaces button:hover {
-    color: @text-secondary;
-    background: rgba(180, 190, 254, 0.15);
+    color: @text-primary;
+    background: @bg-tertiary;
 }
 
 #workspaces button.active {
     color: @bg-primary;
-    background: linear-gradient(135deg, @accent-lavender, @accent-blue);
-    font-weight: 700;
-    box-shadow: 0 2px 8px rgba(137, 180, 250, 0.35);
+    /* Inverted text */
+    background: @accent;
+    /* Solid block background */
+    border: 1px solid @accent;
+    font-weight: bold;
+    box-shadow: none;
 }
 
 #workspaces button.urgent {
     color: @bg-primary;
-    background: linear-gradient(135deg, @accent-red, @accent-peach);
+    background: @accent-red;
+    border: 1px solid @accent-red;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Clock - Central Focus with Gradient Text
+   Clock
    ───────────────────────────────────────────────────────────────────────────── */
 #clock {
-    font-weight: 600;
-    font-size: 13px;
     color: @accent-sky;
-    background: linear-gradient(135deg, 
-        rgba(137, 220, 235, 0.15), 
-        rgba(116, 199, 236, 0.08));
-    border-color: rgba(137, 220, 235, 0.25);
-    padding: 2px 16px;
+    font-weight: 600;
+    background: transparent;
+    border: none;
+    padding: 0 8px;
 }
 
 #clock:hover {
-    background: linear-gradient(135deg, 
-        rgba(137, 220, 235, 0.25), 
-        rgba(116, 199, 236, 0.15));
+    background: @bg-tertiary;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -576,20 +576,16 @@ window#waybar > box {
    ───────────────────────────────────────────────────────────────────────────── */
 #custom-weather {
     color: @accent-yellow;
-    background: linear-gradient(135deg, 
-        rgba(249, 226, 175, 0.12), 
-        rgba(250, 179, 135, 0.08));
-    border-color: rgba(249, 226, 175, 0.2);
+    background: transparent;
+    border: none;
 }
 
 #custom-weather:hover {
-    background: linear-gradient(135deg, 
-        rgba(249, 226, 175, 0.22), 
-        rgba(250, 179, 135, 0.15));
+    background: @bg-tertiary;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Caffeine Toggle - Dynamic States
+   Caffeine Toggle - Simple Text
    ───────────────────────────────────────────────────────────────────────────── */
 #custom-caffeine {
     color: @text-dim;
@@ -597,11 +593,9 @@ window#waybar > box {
 
 #custom-caffeine.active {
     color: @accent-peach;
-    background: linear-gradient(135deg, 
-        rgba(250, 179, 135, 0.2), 
-        rgba(249, 226, 175, 0.12));
-    border-color: rgba(250, 179, 135, 0.35);
-    box-shadow: 0 0 10px rgba(250, 179, 135, 0.3);
+    background: transparent;
+    border-bottom: 2px solid @accent-peach;
+    box-shadow: none;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -609,18 +603,14 @@ window#waybar > box {
    ───────────────────────────────────────────────────────────────────────────── */
 #custom-ram-disk {
     color: @accent-green;
-    background: linear-gradient(135deg, 
-        rgba(166, 227, 161, 0.12), 
-        rgba(148, 226, 213, 0.08));
-    border-color: rgba(166, 227, 161, 0.2);
+    background: transparent;
+    border: none;
 }
 
 #custom-thermal {
     color: @accent-peach;
-    background: linear-gradient(135deg, 
-        rgba(250, 179, 135, 0.12), 
-        rgba(243, 139, 168, 0.08));
-    border-color: rgba(250, 179, 135, 0.2);
+    background: transparent;
+    border: none;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -632,9 +622,7 @@ window#waybar > box {
 
 #network.disconnected {
     color: @accent-red;
-    background: linear-gradient(135deg, 
-        rgba(243, 139, 168, 0.15), 
-        rgba(243, 139, 168, 0.08));
+    background: transparent;
 }
 
 #custom-network-speed {
@@ -651,9 +639,8 @@ window#waybar > box {
 
 #bluetooth.connected {
     color: @accent-sapphire;
-    background: linear-gradient(135deg, 
-        rgba(116, 199, 236, 0.15), 
-        rgba(137, 180, 250, 0.1));
+    background: transparent;
+    border-bottom: 2px solid @accent-sapphire;
 }
 
 #bluetooth.disabled {
@@ -673,39 +660,45 @@ window#waybar > box {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Battery - Color-coded States with Gradients
+   Battery - Simple Colors
    ───────────────────────────────────────────────────────────────────────────── */
 #battery {
-    color: @accent-green;
-    background: linear-gradient(135deg, 
-        rgba(166, 227, 161, 0.12), 
-        rgba(166, 227, 161, 0.06));
-    border-color: rgba(166, 227, 161, 0.2);
+    color: @text-primary;
+    background: transparent;
+    border: none;
 }
 
 #battery.charging {
     color: @accent-teal;
-    background: linear-gradient(135deg, 
-        rgba(148, 226, 213, 0.18), 
-        rgba(166, 227, 161, 0.1));
-    border-color: rgba(148, 226, 213, 0.3);
+    background: transparent;
+    border: none;
 }
 
 #battery.warning:not(.charging) {
     color: @accent-yellow;
-    background: linear-gradient(135deg, 
-        rgba(249, 226, 175, 0.2), 
-        rgba(250, 179, 135, 0.12));
-    border-color: rgba(249, 226, 175, 0.35);
+    background: transparent;
+    border: none;
 }
 
 #battery.critical:not(.charging) {
     color: @accent-red;
-    background: linear-gradient(135deg, 
-        rgba(243, 139, 168, 0.25), 
-        rgba(243, 139, 168, 0.12));
-    border-color: rgba(243, 139, 168, 0.4);
-    box-shadow: 0 0 12px rgba(243, 139, 168, 0.4);
+    background: transparent;
+    border: none;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -717,11 +710,11 @@ window#waybar > box {
     padding: 2px 8px;
 }
 
-#tray > .passive {
+#tray>.passive {
     -gtk-icon-effect: dim;
 }
 
-#tray > .needs-attention {
+#tray>.needs-attention {
     -gtk-icon-effect: highlight;
 }
 
@@ -755,14 +748,12 @@ window#waybar > box {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Tooltip Styling - Glassmorphic
+   Tooltip Styling - Sharp Borders
    ───────────────────────────────────────────────────────────────────────────── */
 tooltip {
-    background: @bg-primary;
-    border: 1px solid @border-color;
-    border-radius: 10px;
-    padding: 8px 14px;
-    box-shadow: 0 4px 16px @shadow-color;
+    background: @bg-secondary;
+    border: 2px solid @border-color;
+    border-radius: 0;
 }
 
 tooltip label {
@@ -802,13 +793,13 @@ echo -e "${MAGENTA}${BOLD}╚═════════════════
 echo ""
 echo -e "${CYAN}${BOLD}  What's Configured:${RESET}"
 echo -e "${DIM}  ─────────────────────────────────────────────────────────────${RESET}"
-echo -e "  ${GREEN}●${RESET} ${BOLD}Glassmorphic floating bar${RESET} with rounded corners"
-echo -e "  ${GREEN}●${RESET} ${BOLD}Catppuccin-inspired${RESET} color palette"
-echo -e "  ${GREEN}●${RESET} ${BOLD}Smooth animations${RESET} and hover effects"
-echo -e "  ${GREEN}●${RESET} ${BOLD}Gradient accents${RESET} on workspaces, clock, battery"
-echo -e "  ${GREEN}●${RESET} Battery states: ${BOLD}green${RESET} → ${YELLOW}yellow${RESET} → ${RED}red${RESET}"
-echo -e "  ${GREEN}●${RESET} Caffeine toggle: ${BOLD}zzz${RESET} / ${BOLD}☕ On${RESET}"
+echo -e "  ${GREEN}●${RESET} ${BOLD}Low-profile sharp design${RESET} (No Rounded Corners!)"
+echo -e "  ${GREEN}●${RESET} ${BOLD}Solid Block Workspaces${RESET} for distinct terminal feel"
+echo -e "  ${GREEN}●${RESET} ${BOLD}Omarchy Integrated${RESET} color palette"
+echo -e "  ${GREEN}●${RESET} ${BOLD}Full-width bar${RESET} with no wasted space"
+echo -e "  ${GREEN}●${RESET} Minimalist modules: ${BOLD}Text-focused${RESET}"
+echo -e "  ${GREEN}●${RESET} Battery states: ${BOLD}Color-coded text${RESET} (no background)"
 echo -e "  ${GREEN}●${RESET} Clean layout without BTC ticker"
 echo ""
-echo -e "${DIM}  Enjoy your beautiful new waybar! 🎨✨${RESET}"
+echo -e "${DIM}  Enjoy your sharp new waybar! 🚀${RESET}"
 echo ""
