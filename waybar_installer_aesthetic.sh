@@ -101,6 +101,35 @@ chmod +x "$HOME/.config/waybar/scripts/caffeine.sh"
 print_success "caffeine.sh created and made executable"
 
 # ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║                    Step 1b: Nightlight Toggle Script                      ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+print_header "Creating Nightlight Toggle Script"
+print_step "Writing nightlight.sh..."
+
+cat << 'SCRIPT' > "$HOME/.config/waybar/scripts/nightlight.sh"
+#!/bin/bash
+
+# Check if an argument is provided
+if [ "$1" == "toggle" ]; then
+    if hyprshade current | grep -q "blue-light-filter"; then
+        hyprshade off
+    else
+        hyprshade on blue-light-filter
+    fi
+fi
+
+# Output status for Waybar
+if hyprshade current | grep -q "blue-light-filter"; then
+    echo '{"text": " On", "tooltip": "Nightlight: On", "class": "active", "alt": "on"}'
+else
+    echo '{"text": " Off", "tooltip": "Nightlight: Off", "class": "inactive", "alt": "off"}'
+fi
+SCRIPT
+
+chmod +x "$HOME/.config/waybar/scripts/nightlight.sh"
+print_success "nightlight.sh created and made executable"
+
+# ╔═══════════════════════════════════════════════════════════════════════════╗
 # ║                    Step 2: Waybar Configuration                           ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 print_header "Creating Waybar Configuration"
@@ -128,6 +157,7 @@ cat << 'CONFIG' > "$HOME/.config/waybar/config.jsonc"
     "custom/weather",
     "custom/update",
     "custom/caffeine",
+    "custom/nightlight",
     "custom/voxtype",
     "custom/screenrecording-indicator"
   ],
@@ -223,6 +253,14 @@ cat << 'CONFIG' > "$HOME/.config/waybar/config.jsonc"
     "format": "{}",
     "tooltip": true,
     "on-click": "xdg-open 'https://wttr.in'"
+  },
+
+  "custom/nightlight": {
+    "exec": "$HOME/.config/waybar/scripts/nightlight.sh",
+    "return-type": "json",
+    "on-click": "$HOME/.config/waybar/scripts/nightlight.sh toggle",
+    "interval": 5,
+    "tooltip": true
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -452,6 +490,7 @@ window#waybar>box {
 #clock,
 #custom-weather,
 #custom-caffeine,
+#custom-nightlight,
 #custom-ram-disk,
 #custom-thermal,
 #network,
@@ -487,6 +526,7 @@ window#waybar>box {
 #pulseaudio:hover,
 #battery:hover,
 #custom-update:hover,
+#custom-nightlight:hover,
 #custom-localsend:hover,
 #custom-hyprwhspr:hover,
 #custom-voxtype:hover,
@@ -592,6 +632,20 @@ window#waybar>box {
 }
 
 #custom-caffeine.active {
+    color: @accent-peach;
+    background: transparent;
+    border-bottom: 2px solid @accent-peach;
+    box-shadow: none;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Nightlight Toggle
+   ───────────────────────────────────────────────────────────────────────────── */
+#custom-nightlight {
+    color: @text-dim;
+}
+
+#custom-nightlight.active {
     color: @accent-peach;
     background: transparent;
     border-bottom: 2px solid @accent-peach;
