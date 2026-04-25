@@ -171,6 +171,33 @@ SCRIPT
 chmod +x "$HOME/.config/waybar/scripts/nightlight.sh"
 print_success "nightlight.sh created and made executable"
 
+print_header "Creating Power Profile Script"
+print_step "Writing power-profile.sh..."
+
+cat << 'SCRIPT' > "$HOME/.config/waybar/scripts/power-profile.sh"
+#!/bin/bash
+
+PROFILE=$(powerprofilesctl get 2>/dev/null)
+
+case "$PROFILE" in
+    power-saver)
+        echo '{"text": "ECO", "tooltip": "Power profile: power-saver", "class": "eco"}'
+        ;;
+    performance)
+        echo '{"text": "BOOST", "tooltip": "Power profile: performance", "class": "boost"}'
+        ;;
+    balanced)
+        echo '{"text": "NORMAL", "tooltip": "Power profile: balanced", "class": "normal"}'
+        ;;
+    *)
+        echo '{"text": "N/A", "tooltip": "Power profile unavailable", "class": "unknown"}'
+        ;;
+esac
+SCRIPT
+
+chmod +x "$HOME/.config/waybar/scripts/power-profile.sh"
+print_success "power-profile.sh created and made executable"
+
 # ╔═══════════════════════════════════════════════════════════════════════════╗
 # ║                    Step 2: Waybar Configuration                           ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
@@ -206,6 +233,7 @@ cat << 'CONFIG' > "$HOME/.config/waybar/config.jsonc"
   "modules-right": [
     "custom/ram-disk",
     "custom/thermal",
+    "custom/power-profile",
     "group/tray-expander",
     "custom/network-speed",
     "network",
@@ -277,6 +305,13 @@ cat << 'CONFIG' > "$HOME/.config/waybar/config.jsonc"
     "tooltip": true,
     "on-click": "omarchy-launch-floating-terminal-with-presentation btop"
   },
+  "custom/power-profile": {
+    "exec": "$HOME/.config/waybar/scripts/power-profile.sh",
+    "return-type": "json",
+    "interval": 10,
+    "format": "{}",
+    "tooltip": true
+  },
 
   // ═══════════════════════════════════════════════════════════════════════════
   // Clock & Weather
@@ -336,11 +371,11 @@ cat << 'CONFIG' > "$HOME/.config/waybar/config.jsonc"
   // Power & Audio
   // ═══════════════════════════════════════════════════════════════════════════
   "battery": {
-    "format": "{capacity}% {icon} ({power}W)",
+    "format": "{capacity}% {icon}\n{power}W",
     "format-time": "{H}:{M:02}",
-    "format-discharging": "{capacity}% {icon} ({power}W)",
-    "format-charging": "{capacity}% 󰂄 ({power}W)",
-    "format-plugged": "{capacity}%  ({power}W)",
+    "format-discharging": "{capacity}% {icon}\n{power}W",
+    "format-charging": "{capacity}% 󰂄\n{power}W",
+    "format-plugged": "{capacity}%\n{power}W",
     "format-icons": {
       "charging": ["󰢜", "󰂆", "󰂇", "󰂈", "󰢝", "󰂉", "󰢞", "󰂊", "󰂋", "󰂅"],
       "default": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
@@ -536,6 +571,7 @@ window#waybar>box {
 #custom-nightlight,
 #custom-ram-disk,
 #custom-thermal,
+#custom-power-profile,
 #network,
 #custom-network-speed,
 #bluetooth,
@@ -563,6 +599,7 @@ window#waybar>box {
 #custom-caffeine:hover,
 #custom-ram-disk:hover,
 #custom-thermal:hover,
+#custom-power-profile:hover,
 #network:hover,
 #custom-network-speed:hover,
 #bluetooth:hover,

@@ -152,6 +152,33 @@ SCRIPT
 chmod +x "$REAL_HOME/.config/waybar/scripts/nightlight.sh"
 print_success "nightlight.sh created"
 
+print_header "Creating Power Profile Script"
+print_step "Writing power-profile.sh..."
+
+cat << 'SCRIPT' > "$REAL_HOME/.config/waybar/scripts/power-profile.sh"
+#!/bin/bash
+
+PROFILE=$(powerprofilesctl get 2>/dev/null)
+
+case "$PROFILE" in
+    power-saver)
+        echo '{"text": "ECO", "tooltip": "Power profile: power-saver", "class": "eco"}'
+        ;;
+    performance)
+        echo '{"text": "BOOST", "tooltip": "Power profile: performance", "class": "boost"}'
+        ;;
+    balanced)
+        echo '{"text": "NORMAL", "tooltip": "Power profile: balanced", "class": "normal"}'
+        ;;
+    *)
+        echo '{"text": "N/A", "tooltip": "Power profile unavailable", "class": "unknown"}'
+        ;;
+esac
+SCRIPT
+
+chmod +x "$REAL_HOME/.config/waybar/scripts/power-profile.sh"
+print_success "power-profile.sh created"
+
 # ╔═══════════════════════════════════════════════════════════════════════════╗
 # ║  Step 2: Waybar Configuration (no battery module)                         ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
@@ -186,6 +213,7 @@ cat << 'CONFIG' > "$REAL_HOME/.config/waybar/config.jsonc"
   "modules-right": [
     "custom/ram-disk",
     "custom/thermal",
+    "custom/power-profile",
     "group/tray-expander",
     "custom/network-speed",
     "network",
@@ -249,6 +277,13 @@ cat << 'CONFIG' > "$REAL_HOME/.config/waybar/config.jsonc"
     "format": "{}",
     "tooltip": true,
     "on-click": "omarchy-launch-floating-terminal-with-presentation btop"
+  },
+  "custom/power-profile": {
+    "exec": "$HOME/.config/waybar/scripts/power-profile.sh",
+    "return-type": "json",
+    "interval": 10,
+    "format": "{}",
+    "tooltip": true
   },
 
   "clock": {
@@ -467,6 +502,7 @@ window#waybar>box {
 #custom-nightlight,
 #custom-ram-disk,
 #custom-thermal,
+#custom-power-profile,
 #network,
 #custom-network-speed,
 #bluetooth,
@@ -491,6 +527,7 @@ window#waybar>box {
 #custom-caffeine:hover,
 #custom-ram-disk:hover,
 #custom-thermal:hover,
+#custom-power-profile:hover,
 #network:hover,
 #custom-network-speed:hover,
 #bluetooth:hover,

@@ -49,6 +49,29 @@ SCRIPT
 
 chmod +x "$HOME/.config/waybar/scripts/caffeine.sh"
 
+cat << 'SCRIPT' > "$HOME/.config/waybar/scripts/power-profile.sh"
+#!/bin/bash
+
+PROFILE=$(powerprofilesctl get 2>/dev/null)
+
+case "$PROFILE" in
+    power-saver)
+        echo '{"text": "ECO", "tooltip": "Power profile: power-saver", "class": "eco"}'
+        ;;
+    performance)
+        echo '{"text": "BOOST", "tooltip": "Power profile: performance", "class": "boost"}'
+        ;;
+    balanced)
+        echo '{"text": "NORMAL", "tooltip": "Power profile: balanced", "class": "normal"}'
+        ;;
+    *)
+        echo '{"text": "N/A", "tooltip": "Power profile unavailable", "class": "unknown"}'
+        ;;
+esac
+SCRIPT
+
+chmod +x "$HOME/.config/waybar/scripts/power-profile.sh"
+
 # 2. Update config.jsonc
 # Modifies Battery to show percentage and ensures Caffeine is configured
 # We use a temporary file to rebuild the specific modules to avoid breaking the whole file structure
@@ -67,6 +90,7 @@ cat << 'CONFIG' > "$HOME/.config/waybar/config.jsonc"
     "custom/btc",
     "custom/ram-disk",
     "custom/thermal",
+    "custom/power-profile",
     "group/tray-expander",
     "custom/network-speed",
     "network",
@@ -127,6 +151,13 @@ cat << 'CONFIG' > "$HOME/.config/waybar/config.jsonc"
     "tooltip": true,
     "on-click": "omarchy-launch-floating-terminal-with-presentation btop"
   },
+  "custom/power-profile": {
+    "exec": "$HOME/.config/waybar/scripts/power-profile.sh",
+    "return-type": "json",
+    "interval": 10,
+    "format": "{}",
+    "tooltip": true
+  },
   "clock": {
     "format": "{:L%A %I:%M %p}",
     "format-alt": "{:L%d %B W%V %Y}",
@@ -170,11 +201,11 @@ cat << 'CONFIG' > "$HOME/.config/waybar/config.jsonc"
     "on-click": "omarchy-launch-wifi"
   },
   "battery": {
-    "format": "{capacity}% {icon}",
+    "format": "{capacity}% {icon}\n{power}W",
     "format-time": "{H}:{M:02}",
-    "format-discharging": "{capacity}% {icon}",
-    "format-charging": "{capacity}% 󰂄 ({power}W)",
-    "format-plugged": "{capacity}%  ({power}W)",
+    "format-discharging": "{capacity}% {icon}\n{power}W",
+    "format-charging": "{capacity}% 󰂄\n{power}W",
+    "format-plugged": "{capacity}% \n{power}W",
     "format-alt": "{time} {icon}",
     "format-icons": {
       "charging": ["󰢜", "󰂆", "󰂇", "󰂈", "󰢝", "󰂉", "󰢞", "󰂊", "󰂋", "󰂅"],
