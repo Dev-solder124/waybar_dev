@@ -128,7 +128,7 @@ cat << 'CONFIG' > "$HOME/.config/waybar/config.jsonc"
     "on-click": "omarchy-launch-floating-terminal-with-presentation btop"
   },
   "clock": {
-    "format": "{:L%A %H:%M}",
+    "format": "{:L%A %I:%M %p}",
     "format-alt": "{:L%d %B W%V %Y}",
     "tooltip": false,
     "on-click-right": "omarchy-launch-floating-terminal-with-presentation omarchy-tz-select"
