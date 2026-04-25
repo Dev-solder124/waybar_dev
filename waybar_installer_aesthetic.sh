@@ -179,15 +179,31 @@ cat << 'SCRIPT' > "$HOME/.config/waybar/scripts/power-profile.sh"
 
 PROFILE=$(powerprofilesctl get 2>/dev/null)
 
+toggle_profile() {
+    case "$PROFILE" in
+        power-saver) NEXT="balanced" ;;
+        balanced) NEXT="performance" ;;
+        performance) NEXT="power-saver" ;;
+        *) NEXT="balanced" ;;
+    esac
+
+    powerprofilesctl set "$NEXT" 2>/dev/null
+}
+
+if [ "$1" = "toggle" ]; then
+    toggle_profile
+    PROFILE=$(powerprofilesctl get 2>/dev/null)
+fi
+
 case "$PROFILE" in
     power-saver)
-        echo '{"text": "ECO", "tooltip": "Power profile: power-saver", "class": "eco"}'
+        echo '{"text": "🥔🛵🐌", "tooltip": "Power profile: power-saver", "class": "eco"}'
         ;;
     performance)
-        echo '{"text": "BOOST", "tooltip": "Power profile: performance", "class": "boost"}'
+        echo '{"text": "🔥🏎️💨", "tooltip": "Power profile: performance", "class": "boost"}'
         ;;
     balanced)
-        echo '{"text": "NORMAL", "tooltip": "Power profile: balanced", "class": "normal"}'
+        echo '{"text": "🙂🚗⚙️", "tooltip": "Power profile: balanced", "class": "normal"}'
         ;;
     *)
         echo '{"text": "N/A", "tooltip": "Power profile unavailable", "class": "unknown"}'
@@ -235,7 +251,6 @@ cat << 'CONFIG' > "$HOME/.config/waybar/config.jsonc"
     "custom/thermal",
     "custom/power-profile",
     "group/tray-expander",
-    "custom/network-speed",
     "network",
     "bluetooth",
     "pulseaudio",
@@ -310,7 +325,8 @@ cat << 'CONFIG' > "$HOME/.config/waybar/config.jsonc"
     "return-type": "json",
     "interval": 10,
     "format": "{}",
-    "tooltip": true
+    "tooltip": true,
+    "on-click": "$HOME/.config/waybar/scripts/power-profile.sh toggle"
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -358,14 +374,6 @@ cat << 'CONFIG' > "$HOME/.config/waybar/config.jsonc"
     "on-click": "omarchy-launch-wifi"
   },
 
-  "custom/network-speed": {
-    "exec": "$HOME/.config/waybar/scripts/network-speed.sh",
-    "return-type": "json",
-    "interval": 2,
-    "format": "{}",
-    "tooltip": true,
-    "on-click": "omarchy-launch-wifi"
-  },
 
   // ═══════════════════════════════════════════════════════════════════════════
   // Power & Audio
