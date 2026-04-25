@@ -36,7 +36,7 @@ if [ -n "$SUDO_USER" ]; then
     print_warn "Running as sudo — using home: $REAL_HOME"
 fi
 
-mkdir -p "$REAL_HOME/.config/waybar/scripts"
+mkdir -p "$REAL_HOME/.config/waybar/scripts" "$REAL_HOME/.config/waybar/shaders"
 
 # ╔═══════════════════════════════════════════════════════════════════════════╗
 # ║  Step 1: Caffeine Toggle Script                                           ║
@@ -87,18 +87,62 @@ print_success "caffeine.sh created"
 print_header "Creating Nightlight Toggle Script"
 print_step "Writing nightlight.sh..."
 
+cat << 'SHADER' > "$REAL_HOME/.config/waybar/shaders/nightlight.frag"
+#version 320 es
+
+precision highp float;
+in vec2 v_texcoord;
+uniform sampler2D tex;
+layout(location = 0) out vec4 fragColor;
+
+void main() {
+    vec4 color = texture(tex, v_texcoord);
+    color.r = min(color.r * 1.08, 1.0);
+    color.g = color.g * 0.84;
+    color.b = color.b * 0.58;
+    fragColor = color;
+}
+SHADER
+
 cat << 'SCRIPT' > "$REAL_HOME/.config/waybar/scripts/nightlight.sh"
 #!/bin/bash
 
-if [ "$1" == "toggle" ]; then
-    if hyprshade current | grep -q "blue-light-filter"; then
-        hyprshade off
+SHADER_FILE="$HOME/.config/waybar/shaders/nightlight.frag"
+STATE_FILE="/tmp/waybar-nightlight.lock"
+
+is_active() {
+    [ -f "$STATE_FILE" ]
+}
+
+set_shader() {
+    hyprctl keyword decoration:screen_shader "$1" >/dev/null
+}
+
+if [ "$1" = "toggle" ]; then
+    if ! command -v hyprctl >/dev/null 2>&1; then
+        notify-send "Nightlight unavailable" "hyprctl is not installed." -i dialog-warning
+    elif [ ! -f "$SHADER_FILE" ]; then
+        notify-send "Nightlight unavailable" "Missing shader: $SHADER_FILE" -i dialog-warning
+    elif is_active; then
+        if set_shader ""; then
+            rm -f "$STATE_FILE"
+            notify-send "Nightlight Disabled" "Screen colors restored." -i weather-clear-night
+        else
+            notify-send "Nightlight failed" "Could not clear the Hyprland screen shader." -i dialog-warning
+        fi
     else
-        hyprshade on blue-light-filter
+        set_shader "" 2>/dev/null || true
+        if set_shader "$SHADER_FILE"; then
+            touch "$STATE_FILE"
+            notify-send "Nightlight Enabled" "Warm screen shader applied." -i weather-clear-night
+        else
+            notify-send "Nightlight failed" "Could not apply the Hyprland screen shader." -i dialog-warning
+        fi
     fi
+    pkill -SIGRTMIN+10 waybar 2>/dev/null || true
 fi
 
-if hyprshade current | grep -q "blue-light-filter"; then
+if is_active; then
     echo '{"text": " On", "tooltip": "Nightlight: On", "class": "active", "alt": "on"}'
 else
     echo '{"text": " Off", "tooltip": "Nightlight: Off", "class": "inactive", "alt": "off"}'
@@ -342,6 +386,7 @@ cat << 'CONFIG' > "$REAL_HOME/.config/waybar/config.jsonc"
     "return-type": "json",
     "on-click": "$HOME/.config/waybar/scripts/nightlight.sh toggle",
     "interval": 5,
+    "signal": 10,
     "tooltip": true
   },
 
