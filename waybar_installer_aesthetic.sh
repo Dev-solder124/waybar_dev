@@ -197,13 +197,13 @@ fi
 
 case "$PROFILE" in
     power-saver)
-        echo '{"text": "🥔🛵🐌", "tooltip": "Power profile: power-saver", "class": "eco"}'
+        echo '{"text": "MID 🍏", "tooltip": "Power profile: power-saver", "class": "eco"}'
         ;;
     performance)
-        echo '{"text": "🔥🏎️💨", "tooltip": "Power profile: performance", "class": "boost"}'
+        echo '{"text": "HOT 🔥", "tooltip": "Power profile: performance", "class": "boost"}'
         ;;
     balanced)
-        echo '{"text": "🙂🚗⚙️", "tooltip": "Power profile: balanced", "class": "normal"}'
+        echo '{"text": "TEN 💎", "tooltip": "Power profile: balanced", "class": "normal"}'
         ;;
     *)
         echo '{"text": "N/A", "tooltip": "Power profile unavailable", "class": "unknown"}'
